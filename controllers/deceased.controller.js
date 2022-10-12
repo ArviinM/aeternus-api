@@ -103,7 +103,6 @@ exports.updateDeceasedInformation = (req, res) => {
       grave_plot: req.body.grave_plot,
       obituary: req.body.obituary,
     },
-    { useFindandModify: false },
     { new: true }
   )
     .then((data) => {
