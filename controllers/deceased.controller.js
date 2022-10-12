@@ -90,7 +90,6 @@ exports.updateDeceasedInformation = (req, res) => {
     });
   }
 
-  // const url = req.protocol + "://" + req.get("host");
   const id = req.params.id;
 
   Deceased.findByIdAndUpdate(
@@ -99,13 +98,13 @@ exports.updateDeceasedInformation = (req, res) => {
       first_name: req.body.first_name,
       middle_name: req.body.middle_name,
       last_name: req.body.last_name,
-      // profile_picture: url + "/public/" + req.file.filename,
       birth_date: req.body.birth_date,
       death_date: req.body.death_date,
       grave_plot: req.body.grave_plot,
       obituary: req.body.obituary,
     },
-    { useFindandModify: false }
+    { useFindandModify: false },
+    { new: true }
   )
     .then((data) => {
       if (!data) {
