@@ -91,7 +91,7 @@ exports.updateDeceasedInformation = (req, res) => {
   }
 
   const id = req.params.id;
-
+  console.log(req.body);
   Deceased.findByIdAndUpdate(
     id,
     {
@@ -103,7 +103,7 @@ exports.updateDeceasedInformation = (req, res) => {
       grave_plot: req.body.grave_plot,
       obituary: req.body.obituary,
     },
-    { useFindandModify: false, new: true }
+    { new: true, useFindandModify: false }
   )
     .then((data) => {
       if (!data) {
