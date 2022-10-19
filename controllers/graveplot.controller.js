@@ -3,10 +3,11 @@ const GravePlot = db.gravePlot;
 
 exports.create = (req, res) => {
   const plot = new GravePlot({
-    lot_address: req.body.lot_address,
-    status: req.body.status,
-    southWest: [req.body.southWest, req.body.southWest2],
-    northEast: [req.body.northEast, req.body.northEast2],
+    block: req.body.block.id,
+    lot: req.body.lot,
+    status: req.body.status.id,
+    southWest: [req.body.southWest[0], req.body.southWest[1]],
+    northEast: [req.body.northEast[0], req.body.northEast[1]],
   });
 
   //save plot to database
@@ -25,12 +26,12 @@ exports.create = (req, res) => {
 
 exports.findAll = (req, res) => {
   //retrieve all grave plots
-  const lot_address = req.query.lot_address;
-  var condition = lot_address
-    ? { lot_address: { $regex: new RegExp(lot_address), $options: "i" } }
+  const block = req.query.block;
+  var condition = block
+    ? { block: { $regex: new RegExp(block), $options: "i" } }
     : {};
   GravePlot.find(condition)
-    .populate("status")
+    .populate("status block")
     .then((data) => {
       res.status(200).send(data);
     })
@@ -60,6 +61,26 @@ exports.findOne = (req, res) => {
     });
 };
 
+exports.findBlocks = (req, res) => {
+  const block = req.params.block;
+  GravePlot.find({ block: block })
+    .then((data) => {
+      if (!data) {
+        res
+          .status(404)
+          .send({ message: "Grave Plot not found with block " + block });
+      } else {
+        res.status(200).send(data);
+        // res.json(data.toString("base64"));
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Grave Plot with block=" + block + " " + err,
+      });
+    });
+};
+
 exports.updateName = (req, res) => {
   if (!req.body) {
     return res.status(400).send({
@@ -71,7 +92,9 @@ exports.updateName = (req, res) => {
   GravePlot.findByIdAndUpdate(
     id,
     {
-      lot_address: req.body.lot_address,
+      block: req.body.block.id,
+      lot: req.body.lot,
+      status: req.body.status.id,
     },
     { useFindandModify: false }
   )
@@ -100,8 +123,8 @@ exports.updateLocation = (req, res) => {
   GravePlot.findByIdAndUpdate(
     id,
     {
-      southWest: [req.body.southWest, req.body.southWest2],
-      northEast: [req.body.northEast, req.body.northEast2],
+      southWest: [req.body.southWest[0], req.body.southWest[1]],
+      northEast: [req.body.northEast[0], req.body.northEast[1]],
     },
     { useFindandModify: false }
   )

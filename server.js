@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const db = require("./models");
+const Block = require("./models/block.model");
 const Role = db.role;
 const Status = db.status;
 
@@ -91,6 +92,43 @@ function initial() {
           console.log("Error: ", err);
         }
         console.log("Added 'occupied' to status collection");
+      });
+    }
+  });
+
+  Block.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new Block({
+        name: "1",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added '1' to Block collection");
+      });
+      new Block({
+        name: "2",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added '2' to Block collection");
+      });
+      new Block({
+        name: "3",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added '3' to Block collection");
+      });
+      new Block({
+        name: "4",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added '4' to Block collection");
       });
     }
   });

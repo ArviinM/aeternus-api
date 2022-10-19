@@ -48,6 +48,12 @@ exports.getAllDeceased = (req, res) => {
 
   Deceased.find(condition)
     .populate("grave_plot")
+    .populate({
+      path: "grave_plot",
+      populate: {
+        path: "block",
+      },
+    })
     .then((data) => {
       if (data) {
         res.status(200).send(data);

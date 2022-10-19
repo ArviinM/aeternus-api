@@ -30,6 +30,9 @@ module.exports = function (app) {
 
   //retrieve a single grave plot
   router.get("/:id", graveplot.findOne);
+
+  //retrieve specified blocks
+  router.get("/block/:block", graveplot.findBlocks);
   //delete a grave plot
   router.delete(
     "/:id",

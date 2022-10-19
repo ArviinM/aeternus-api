@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const mapSchema = new mongoose.Schema(
   {
-    lot_address: { type: String, required: true },
+    block: { type: mongoose.Schema.Types.ObjectId, ref: "Block" },
+    lot: { type: String, required: true },
     status: { type: mongoose.Schema.Types.ObjectId, ref: "Status" },
     southWest: [{ type: Number, required: true }],
     northEast: [{ type: Number, required: true }],
