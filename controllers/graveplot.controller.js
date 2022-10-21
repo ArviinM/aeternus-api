@@ -32,6 +32,7 @@ exports.findAll = (req, res) => {
     : {};
   GravePlot.find(condition)
     .populate("status block")
+    .sort({ block: 1, lot: 1 })
     .then((data) => {
       res.status(200).send(data);
     })

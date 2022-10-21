@@ -51,7 +51,7 @@ exports.getAllDeceased = (req, res) => {
     .populate({
       path: "grave_plot",
       populate: {
-        path: "block",
+        path: "block status",
       },
     })
     .then((data) => {
