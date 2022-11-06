@@ -1,4 +1,5 @@
 const db = require("../models");
+const GravePlot = require("../models/graveplot.model");
 const Deceased = db.deceased;
 
 exports.create = (req, res) => {
@@ -25,6 +26,34 @@ exports.create = (req, res) => {
     .save(deceased)
     .then((data) => {
       if (data) {
+        GravePlot.findByIdAndUpdate(
+          { _id: req.body.grave_plot },
+          // status: "6363f91e750f685635b02906"
+          { $push: { deceased: data.id } },
+          { safe: true, upsert: true, new: true, useFindandModify: false }
+        )
+          .then((data) => {
+            if (data) {
+              GravePlot.findByIdAndUpdate(
+                { _id: req.body.grave_plot },
+                { status: "6363f91e750f685635b02906" },
+                { safe: true, new: true, useFindandModify: false }
+              ).catch((err) => {
+                res.status(500).send({
+                  message:
+                    err.message ||
+                    "Some error occured while creating a Grave Plot.",
+                });
+              });
+            }
+          })
+          .catch((err) => {
+            res.status(500).send({
+              message:
+                err.message ||
+                "Some error occured while creating a Grave Plot.",
+            });
+          });
         res.status(200).send(data);
       }
     })
@@ -172,6 +201,18 @@ exports.deleteDeceased = (req, res) => {
           message: `Cannot delete Deceased with id=${id}. Maybe Deceased was not found!`,
         });
       } else {
+        console.log(data.id);
+        console.log(data.grave_plot);
+        GravePlot.findByIdAndUpdate(
+          { _id: data.grave_plot },
+          { $pull: { deceased: data.id } },
+          { safe: true, new: true, useFindandModify: false }
+        ).catch((err) => {
+          res.status(500).send({
+            message:
+              err.message || "Some error occured while creating a Grave Plot.",
+          });
+        });
         res.status(200).send({
           message: "Deceased Information was delete successfully!",
         });

@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const mapSchema = new mongoose.Schema(
   {
     block: { type: mongoose.Schema.Types.ObjectId, ref: "Block" },
-    lot: { type: String, required: true },
+    lot: { type: String },
     status: { type: mongoose.Schema.Types.ObjectId, ref: "Status" },
-    southWest: [{ type: Number, required: true }],
-    northEast: [{ type: Number, required: true }],
+    southWest: [{ type: Number }],
+    northEast: [{ type: Number }],
+    deceased: [{ type: mongoose.Schema.Types.ObjectId, ref: "Deceased" }],
   },
   { timestamps: true }
 );

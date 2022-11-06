@@ -31,7 +31,7 @@ exports.findAll = (req, res) => {
     ? { block: { $regex: new RegExp(block), $options: "i" } }
     : {};
   GravePlot.find(condition)
-    .populate("status block")
+    .populate("status block deceased")
     .sort({ block: 1, lot: 1 })
     .then((data) => {
       res.status(200).send(data);
