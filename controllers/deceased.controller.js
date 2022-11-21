@@ -98,6 +98,191 @@ exports.getAllDeceased = (req, res) => {
     });
 };
 
+exports.getAllDeceasedChart = (req, res) => {
+  //retrieve all deceased informations
+
+  const name = req.query.id;
+
+  const FIRST_MONTH = 1;
+  const LAST_MONTH = 12;
+  const MONTHS_ARRAY = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+
+  let TODAY = "2022-12-31T23:59:59";
+  let YEAR_BEFORE = "2022-01-01T00:00:00";
+
+  Deceased.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: new Date(YEAR_BEFORE), $lte: new Date() },
+      },
+    },
+    {
+      $group: {
+        _id: { year_month: { $substrCP: ["$createdAt", 0, 7] } },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { "_id.year_month": 1 },
+    },
+    {
+      $project: {
+        _id: 0,
+        count: 1,
+        month_year: {
+          $concat: [
+            {
+              $arrayElemAt: [
+                MONTHS_ARRAY,
+                {
+                  $subtract: [
+                    { $toInt: { $substrCP: ["$_id.year_month", 5, 2] } },
+                    1,
+                  ],
+                },
+              ],
+            },
+            "-",
+            { $substrCP: ["$_id.year_month", 0, 4] },
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        data: { $push: { k: "$month_year", v: "$count" } },
+      },
+    },
+    {
+      $addFields: {
+        start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
+        end_year: { $substrCP: [TODAY, 0, 4] },
+        months1: {
+          $range: [
+            { $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } },
+            { $add: [LAST_MONTH, 1] },
+          ],
+        },
+        months2: {
+          $range: [
+            FIRST_MONTH,
+            { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] },
+          ],
+        },
+      },
+    },
+    {
+      $addFields: {
+        template_data: {
+          $concatArrays: [
+            {
+              $map: {
+                input: "$months1",
+                as: "m1",
+                in: {
+                  count: 0,
+                  month_year: {
+                    $concat: [
+                      {
+                        $arrayElemAt: [
+                          MONTHS_ARRAY,
+                          { $subtract: ["$$m1", 1] },
+                        ],
+                      },
+                      "-",
+                      "$start_year",
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              $map: {
+                input: "$months2",
+                as: "m2",
+                in: {
+                  count: 0,
+                  month_year: {
+                    $concat: [
+                      {
+                        $arrayElemAt: [
+                          MONTHS_ARRAY,
+                          { $subtract: ["$$m2", 1] },
+                        ],
+                      },
+                      "-",
+                      "$end_year",
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      $addFields: {
+        data: {
+          $map: {
+            input: "$template_data",
+            as: "t",
+            in: {
+              k: "$$t.month_year",
+              v: {
+                $reduce: {
+                  input: "$data",
+                  initialValue: 0,
+                  in: {
+                    $cond: [
+                      { $eq: ["$$t.month_year", "$$this.k"] },
+                      { $add: ["$$this.v", "$$value"] },
+                      { $add: [0, "$$value"] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        data: { $arrayToObject: "$data" },
+        _id: 0,
+      },
+    },
+  ])
+    .then((data) => {
+      if (data) {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          "Some error occured while creating a Deceased Information" +
+          " " +
+          err,
+      });
+    });
+};
+
 exports.getOneDeceased = (req, res) => {
   const id = req.params.id;
 

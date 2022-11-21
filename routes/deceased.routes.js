@@ -54,6 +54,8 @@ module.exports = function (app) {
   //retrieve all deceased informations
   app.get("/api/deceased", deceased.getAllDeceased);
 
+  app.get("/api/deceased-chart", deceased.getAllDeceasedChart);
+
   //retrieve a single deceased information
   app.get("/api/deceased/:id", deceased.getOneDeceased);
 
