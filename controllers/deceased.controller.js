@@ -98,11 +98,88 @@ exports.getAllDeceased = (req, res) => {
     });
 };
 
-exports.getAllDeceasedChart = (req, res) => {
+exports.getAllDeceasedAgePie = (req, res) => {
   //retrieve all deceased informations
 
-  const name = req.query.id;
+  let TODAY = "2022-12-31T23:59:59";
+  let YEAR_BEFORE = "2022-01-01T00:00:00";
 
+  Deceased.aggregate([
+    {
+      $match: { createdAt: { $gte: new Date(YEAR_BEFORE), $lte: new Date() } },
+    },
+    {
+      $project: {
+        age: {
+          $divide: [
+            {
+              $subtract: [
+                { $ifNull: ["$death_date", new Date()] },
+                { $ifNull: ["$birth_date", new Date()] },
+              ],
+            },
+            1000 * 86400 * 365,
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $concat: [
+            { $cond: [{ $lte: ["$age", 0] }, "Unknown", ""] },
+            {
+              $cond: [
+                { $and: [{ $gt: ["$age", 0] }, { $lt: ["$age", 10] }] },
+                "Under 10",
+                "",
+              ],
+            },
+            {
+              $cond: [
+                { $and: [{ $gte: ["$age", 10] }, { $lt: ["$age", 31] }] },
+                "10 - 30",
+                "",
+              ],
+            },
+            {
+              $cond: [
+                { $and: [{ $gte: ["$age", 31] }, { $lt: ["$age", 51] }] },
+                "31 - 50",
+                "",
+              ],
+            },
+            {
+              $cond: [
+                { $and: [{ $gte: ["$age", 51] }, { $lt: ["$age", 71] }] },
+                "51 - 70",
+                "",
+              ],
+            },
+            { $cond: [{ $gte: ["$age", 71] }, "Over 70", ""] },
+          ],
+        },
+        personas: { $sum: 1 },
+      },
+    },
+    { $project: { _id: 0, age: "$_id", personas: 1 } },
+  ])
+    .then((data) => {
+      if (data) {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          "Some error occured while creating a Deceased Information" +
+          " " +
+          err,
+      });
+    });
+};
+
+exports.getAllDeceasedChart = (req, res) => {
   const FIRST_MONTH = 1;
   const LAST_MONTH = 12;
   const MONTHS_ARRAY = [
