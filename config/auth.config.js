@@ -1,6 +1,7 @@
 module.exports = {
   secret: "arvin-secret-key-strange-fate",
-  jwtExpiration: 3600,
+  jwtEmailExpiration: 600,
+  jwtExpiration: 10800,
   jwtRefreshExpiration: 86400, // 24 hours
   // /* for test */
   // jwtExpiration: 60, // 1 minute

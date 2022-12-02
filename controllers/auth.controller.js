@@ -4,7 +4,18 @@ const { user: User, role: Role, refreshToken: RefreshToken } = db;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
+const dotenv = require("dotenv");
+const nodemailer = require("nodemailer");
+
 const { role } = require("../models");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PW,
+  },
+});
 
 exports.signup = (req, res) => {
   const user = new User({
@@ -107,6 +118,55 @@ exports.signin = (req, res) => {
     });
 };
 
+exports.findUser = (req, res) => {
+  User.findOne({
+    email: req.body.email,
+  }).exec(async (err, user) => {
+    if (err) {
+      res.status(500).send({ message: "Error: " + err });
+      return;
+    }
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    let token = jwt.sign({ id: user.id }, config.secret, {
+      expiresIn: config.jwtEmailExpiration,
+    });
+
+    console.log(token);
+
+    let setUserToken = User.findByIdAndUpdate(
+      { _id: user.id },
+      { password: token },
+      { useFindAndModify: false }
+    ).then((data) => {
+      console.log(data);
+    });
+
+    if (setUserToken) {
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: user.email,
+        subject: "Your Password Reset",
+        text: `\tYou are receiving this because you (or someone else) requested the reset of "${user.username}" user account. \n
+        Please click the following link, or paste this into your browser to complete the process. \n
+        http://localhost:3000/forgot-password/${user.id}/${token}`,
+      };
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.log("Error ", err);
+          res.status(401).send({ message: "Email not send. " + err });
+        } else {
+          console.log("Email Sent! ", info.response);
+          res.status(200).send({ message: "Email sent successfully!" });
+        }
+      });
+    }
+  });
+};
+
 exports.changePassword = (req, res) => {
   if (!req.body) {
     return res.status(400).send({
@@ -142,6 +202,120 @@ exports.changePassword = (req, res) => {
       }
     });
   });
+};
+
+exports.userChangePassword = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to change password cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+  const token = req.params.token;
+
+  User.findOne({ _id: id, password: token })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found." });
+      }
+
+      let verToken = jwt.verify(token, config.secret);
+      console.log(verToken);
+
+      if (verToken) {
+        User.findById(id)
+          .then((user) => {
+            if (!user) {
+              return res
+                .status(404)
+                .send({ message: "Your token has expired!" });
+            }
+
+            const hash = bcrypt.hashSync(req.body.password, 8);
+            user.password = hash;
+            user.save((err) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+              res.send({ message: "Password changed successfully" });
+            });
+          })
+          .catch((err) => {
+            res.status(500).send({
+              message: "Could not your password!" + err,
+            });
+          });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send({
+        message: "Change Password Token has Expired: " + err,
+      });
+    });
+};
+
+exports.adminChangePassword = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to change password cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found." });
+      }
+
+      const hash = bcrypt.hashSync(req.body.password, 8);
+      user.password = hash;
+      user.save((err) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+        res.send({ message: "Password changed successfully" });
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not chnage user password with id=" + id + " " + err,
+      });
+    });
+};
+
+exports.forgotChangePassword = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to change password cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+  const token = req.params.token;
+
+  User.findOne({ _id: id, password: token })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found." });
+      }
+
+      let verToken = jwt.verify(token, config.secret);
+      console.log(verToken);
+
+      res.status(200).send({ message: "User found. " + user });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send({
+        message: "Change Password Token has Expired: " + err,
+      });
+    });
 };
 
 exports.refreshToken = async (req, res) => {

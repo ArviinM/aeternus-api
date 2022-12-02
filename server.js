@@ -20,6 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 
 const db = require("./models");
 const Block = require("./models/block.model");
+const Service = require("./models/service.model");
+const Request = require("./models/request.model");
 const Role = db.role;
 const Status = db.status;
 
@@ -132,6 +134,64 @@ function initial() {
       });
     }
   });
+
+  Service.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new Service({
+        name: "Plot Grass Cutting",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Plot Grass Cutting' to service collection");
+      });
+      new Service({
+        name: "Plot Cleaning",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Plot Cleaning' to service collection");
+      });
+      new Service({
+        name: "Plot Watering",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Plot Watering' to service collection");
+      });
+    }
+  });
+
+  Request.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new Request({
+        name: "Accepted",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Accepted' to request collection");
+      });
+      new Request({
+        name: "Denied",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Denied' to request collection");
+      });
+      new Request({
+        name: "Waiting",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Waiting' to request collection");
+      });
+    }
+  });
 }
 
 app.get("/", (req, res) => {
@@ -147,6 +207,7 @@ require("./routes/auth.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/graveplot.routes")(app);
 require("./routes/deceased.routes")(app);
+require("./routes/service_request.routes")(app);
 
 app.listen(PORT || 5000, () => {
   console.log(`Server is running at port ${PORT} 🚀`);

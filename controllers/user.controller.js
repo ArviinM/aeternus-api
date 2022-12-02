@@ -30,7 +30,7 @@ exports.addRole = (req, res) => {
 
   User.findByIdAndUpdate(
     id,
-    { username: req.body.name, roles: req.body.roles },
+    { username: req.body.username, roles: req.body.roles },
     { useFindAndModify: false }
   )
     .then((data) => {
@@ -39,6 +39,64 @@ exports.addRole = (req, res) => {
           message: `Cannot update User with id=${id}. Maybe User was not found!`,
         });
       } else res.send({ message: "User was updated succesfully." });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error updating User with id=" + id + " " + err,
+      });
+    });
+};
+
+exports.updateUser = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to add role cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+
+  User.findByIdAndUpdate(
+    id,
+    {
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      username: req.body.username,
+      address: req.body.address,
+      contact_no: req.body.contact_no,
+      email: req.body.email,
+    },
+    { useFindAndModify: false }
+  )
+    .then((data) => {
+      console.log(data);
+      if (req.body.roles) {
+        Role.find(
+          {
+            name: { $in: req.body.roles },
+          },
+          (err, roles) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
+            }
+            data.roles = roles.map((role) => role._id);
+            data.save((err) => {
+              if (err) {
+                res.status(500).send({
+                  message:
+                    "Cannot update User with id=${id}. Maybe User was not found! " +
+                    err,
+                });
+                return;
+              }
+              res
+                .status(200)
+                .send({ message: "User was updated succesfully." });
+            });
+          }
+        );
+      }
     })
     .catch((err) => {
       res.status(500).send({
@@ -69,7 +127,6 @@ exports.getUserRole = (req, res) => {
     });
 };
 
-//fetch all users from the database
 exports.allUsers = (req, res) => {
   //retrieve all users
   const name = req.query.username;
@@ -78,15 +135,38 @@ exports.allUsers = (req, res) => {
     : {};
   User.find(condition)
     .select("-password")
-    .then((data) => {
-      if (data) {
-        res.send(data);
+    .populate("roles", "-__v")
+    .exec((err, user) => {
+      var myObject = [];
+
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
       }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occured while retrieving Users.",
-      });
+
+      if (!user) {
+        return res.status(404).send({ message: "No users found!" });
+      }
+
+      let authorities = [];
+      for (let i = 0; i < user.length; i++) {
+        for (let x = 0; x < user[i].roles.length; x++) {
+          authorities.push(user[i].roles[x].name);
+        }
+        myObject.push({
+          id: user[i]._id,
+          username: user[i].username,
+          first_name: user[i].first_name,
+          last_name: user[i].last_name,
+          email: user[i].email,
+          address: user[i].address,
+          contact_no: user[i].contact_no,
+          roles: authorities,
+        });
+        authorities = [];
+      }
+
+      res.status(200).send(myObject);
     });
 };
 

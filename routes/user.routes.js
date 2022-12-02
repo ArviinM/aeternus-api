@@ -35,6 +35,14 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.addRole
   );
+
+  //Update User Information
+  app.put(
+    "/api/auth/user-update/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.updateUser
+  );
+
   app.get(
     "/api/auth/getRole/:id",
     [authJwt.verifyToken, authJwt.isAdmin],

@@ -10,6 +10,9 @@ db.refreshToken = require("./refreshToken.model");
 db.gravePlot = require("./graveplot.model");
 db.status = require("./status.model");
 db.block = require("./block.model");
+db.service = require("./service.model");
+db.service_request = require("./service_request.model");
+db.request = require("./request.model");
 
 db.deceased = require("./deceased.model");
 
