@@ -36,19 +36,6 @@ exports.create = (req, res) => {
       );
     }
   });
-
-  // request
-  //   .save(request)
-  //   .then((data) => {
-  //     console.log(data);
-  //     res.status(200).send(data);
-  //   })
-  //   .catch((err) => {
-  //     res.status(500).send({
-  //       message:
-  //         "Some error occured while creating a Service Request. " + err.message,
-  //     });
-  //   });
 };
 
 exports.findAll = (req, res) => {
@@ -59,19 +46,44 @@ exports.findAll = (req, res) => {
     : {};
 
   ServiceRequest.find(condition)
-    .populate("service user request graveplot", "-password")
-    .then((data) => {
-      if (!data) {
-        res.status(404).send("There are no service requests.");
-      } else {
-        res.status(200).send(data);
-      }
+    .sort({ createdAt: "desc" })
+    .populate("service user request graveplot", "-password -__v")
+    .populate({
+      path: "graveplot",
+      populate: {
+        path: "block",
+      },
     })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          "Some error occured while creating a Service Request. " + err.message,
-      });
+    .exec((err, data) => {
+      var myObject = [];
+
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+
+      if (!data) {
+        return res.status(404).send({ message: "No service request found!" });
+      }
+
+      let authorities = [];
+      for (let i = 0; i < data.length; i++) {
+        for (let x = 0; x < data[i].service.length; x++) {
+          authorities.push(data[i].service[x].name);
+        }
+        myObject.push({
+          id: data[i]._id,
+          graveplot: data[i].graveplot,
+          request: data[i].request,
+          user: data[i].user,
+          service: authorities,
+          createdAt: data[i].createdAt,
+          updatedAt: data[i].updatedAt,
+        });
+        authorities = [];
+      }
+      console.log(data);
+      res.status(200).send(myObject);
     });
 };
 
@@ -86,7 +98,7 @@ exports.updateRequest = (req, res) => {
 
   ServiceRequest.findByIdAndUpdate(
     id,
-    { service: req.body.request.id },
+    { request: req.body.request.id },
     { useFindandModify: false }
   )
     .then((data) => {
