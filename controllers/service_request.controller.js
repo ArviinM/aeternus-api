@@ -46,7 +46,7 @@ exports.findAll = (req, res) => {
     : {};
 
   ServiceRequest.find(condition)
-    .sort({ createdAt: "desc" })
+    .sort({ request: -1, createdAt: -1 })
     .populate("service user request graveplot", "-password -__v")
     .populate({
       path: "graveplot",
@@ -139,6 +139,7 @@ exports.findAllUserServices = (req, res) => {
   const id = req.params.id;
 
   ServiceRequest.find({ user: id })
+    .sort({ createdAt: -1, updatedAt: 1 })
     .populate("service user request graveplot", "-password -__v")
     .populate({
       path: "graveplot",
