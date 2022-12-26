@@ -33,6 +33,7 @@ exports.findAll = (req, res) => {
   GravePlot.find(condition)
     .populate("status block deceased")
     .sort({ block: 1, lot: 1 })
+    .collation({ locale: "en_US", numericOrdering: true })
     .then((data) => {
       res.status(200).send(data);
     })

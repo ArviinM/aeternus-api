@@ -49,7 +49,7 @@ exports.signup = (req, res) => {
               res.status(500).send({ message: err });
               return;
             }
-            res.send({ message: "User was registered successfully" });
+            res.send({ message: "Great! You have successfully registered." });
           });
         }
       );
@@ -65,7 +65,7 @@ exports.signup = (req, res) => {
             res.status(500).send({ message: err });
             return;
           }
-          res.send({ message: "User was registered successfully" });
+          res.send({ message: "Great! You have successfully registered." });
         });
       });
     }
@@ -83,7 +83,10 @@ exports.signin = (req, res) => {
         return;
       }
       if (!user) {
-        return res.status(404).send({ message: "User not found." });
+        return res.status(404).send({
+          message:
+            "Sorry, we can't find your account with this username. Please try again or create a new account.",
+        });
       }
       let passwordIsValid = bcrypt.compareSync(
         req.body.password,
@@ -92,7 +95,8 @@ exports.signin = (req, res) => {
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: "Invalid Password!",
+          message:
+            "Sorry, we couldn't sign you in. Please check that you have already created an account and have entered the correct account details.",
         });
       }
       let token = jwt.sign({ id: user.id }, config.secret, {
@@ -127,7 +131,9 @@ exports.findUser = (req, res) => {
       return;
     }
     if (!user) {
-      return res.status(404).send({ message: "User not found." });
+      return res
+        .status(404)
+        .send({ message: "Sorry, we can't find that user." });
     }
 
     let token = jwt.sign({ id: user.id }, config.secret, {
