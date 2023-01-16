@@ -101,7 +101,6 @@ exports.getAllDeceased = (req, res) => {
 exports.getAllDeceasedAgePie = (req, res) => {
   //retrieve all deceased informations
 
-  let TODAY = "2022-12-31T23:59:59";
   let YEAR_BEFORE = "2022-01-01T00:00:00";
 
   Deceased.aggregate([
@@ -183,6 +182,7 @@ exports.getAllDeceasedChart = (req, res) => {
   const FIRST_MONTH = 1;
   const LAST_MONTH = 12;
   const MONTHS_ARRAY = [
+    "december",
     "january",
     "february",
     "march",
@@ -194,11 +194,10 @@ exports.getAllDeceasedChart = (req, res) => {
     "september",
     "october",
     "november",
-    "december",
   ];
 
-  let TODAY = "2022-12-31T23:59:59";
-  let YEAR_BEFORE = "2022-01-01T00:00:00";
+  let TODAY = "2023-11-31T23:59:59";
+  let YEAR_BEFORE = "2022-11-01T00:00:00";
 
   Deceased.aggregate([
     {
@@ -388,7 +387,7 @@ exports.updateDeceasedInformation = (req, res) => {
   }
 
   const id = req.params.id;
-  console.log(req.body);
+
   Deceased.findByIdAndUpdate(
     id,
     {
@@ -403,11 +402,30 @@ exports.updateDeceasedInformation = (req, res) => {
     { new: true, useFindandModify: false }
   )
     .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `Cannot update Deceased Information with id=${id}. Maybe Deceased Name was not found!`,
-        });
-      } else res.status(200).send(String(data));
+      if (data) {
+        GravePlot.findByIdAndUpdate(
+          { _id: data.grave_plot._id },
+          // {status: "6363f91e750f685635b02906"}
+          { $push: { deceased: data.id } },
+          { safe: true, upsert: true, new: true, useFindandModify: false }
+        )
+          .then((data) => {
+            console.log(data);
+            if (data) {
+              GravePlot.findByIdAndUpdate(
+                { _id: data._id },
+                { status: "6363f91e750f685635b02906" },
+                { safe: true, new: true, useFindandModify: false }
+              ).catch((err) => {
+                console.log(err);
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        res.status(200).send(data);
+      }
     })
     .catch((err) => {
       res.status(500).send({

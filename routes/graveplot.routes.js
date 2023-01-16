@@ -5,6 +5,7 @@ const { authJwt } = require("../middlewares");
 module.exports = function (app) {
   //retrieve all grave plots
   router.get("/", graveplot.findAll);
+  router.get("/check", graveplot.findCheckAvailable);
 
   //create grave plot
   router.post("/", [authJwt.verifyToken, authJwt.isAdmin], graveplot.create);

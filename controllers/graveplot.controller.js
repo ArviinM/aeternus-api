@@ -45,6 +45,34 @@ exports.findAll = (req, res) => {
     });
 };
 
+exports.findCheckAvailable = (req, res) => {
+  //retrieve all grave plots
+  const block = req.query.block;
+  var condition = block
+    ? { block: { $regex: new RegExp(block), $options: "i" } }
+    : {};
+  GravePlot.find({
+    deceased: { $size: 0 },
+    status: "6363f91e750f685635b02904",
+  })
+    .then((data) => {
+      GravePlot.updateMany(
+        { deceased: { $size: 0 } },
+        { status: "6363f91e750f685635b02904" },
+        { safe: true, new: true, useFindandModify: false }
+      ).then((data2) => {
+        console.log(data2);
+        res.status(200).send(data2);
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occured while retrieving Grave Plots.",
+      });
+    });
+};
+
 exports.findOne = (req, res) => {
   const id = req.params.id;
   GravePlot.findById(id)
