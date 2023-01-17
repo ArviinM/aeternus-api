@@ -8,7 +8,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 var corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "https://aeternus-frontend.onrender.com/",
   credentials: true,
 };
 
