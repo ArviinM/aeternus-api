@@ -388,44 +388,62 @@ exports.updateDeceasedInformation = (req, res) => {
 
   const id = req.params.id;
 
-  Deceased.findByIdAndUpdate(
-    id,
-    {
-      first_name: req.body.first_name,
-      middle_name: req.body.middle_name,
-      last_name: req.body.last_name,
-      birth_date: req.body.birth_date,
-      death_date: req.body.death_date,
-      grave_plot: req.body.grave_plot,
-      obituary: req.body.obituary,
-    },
-    { new: true, useFindandModify: false }
+  GravePlot.findOneAndUpdate(
+    { deceased: id },
+    { $pull: { deceased: id } },
+    { new: true, multi: true }
   )
     .then((data) => {
-      if (data) {
-        GravePlot.findByIdAndUpdate(
-          { _id: data.grave_plot._id },
-          // {status: "6363f91e750f685635b02906"}
-          { $push: { deceased: data.id } },
-          { safe: true, upsert: true, new: true, useFindandModify: false }
-        )
-          .then((data) => {
-            console.log(data);
-            if (data) {
-              GravePlot.findByIdAndUpdate(
-                { _id: data._id },
-                { status: "6363f91e750f685635b02906" },
-                { safe: true, new: true, useFindandModify: false }
-              ).catch((err) => {
+      console.log(id);
+      console.log(data);
+      Deceased.findByIdAndUpdate(
+        id,
+        {
+          first_name: req.body.first_name,
+          middle_name: req.body.middle_name,
+          last_name: req.body.last_name,
+          birth_date: req.body.birth_date,
+          death_date: req.body.death_date,
+          grave_plot: req.body.grave_plot,
+          obituary: req.body.obituary,
+        },
+        { new: true, useFindandModify: false }
+      )
+        .then((data) => {
+          if (data) {
+            GravePlot.findByIdAndUpdate(
+              { _id: data.grave_plot._id },
+              // {status: "6363f91e750f685635b02906"}
+              { $push: { deceased: data.id } },
+              { safe: true, upsert: true, new: true, useFindandModify: false }
+            )
+              .then((data) => {
+                console.log(data);
+                if (data) {
+                  GravePlot.findByIdAndUpdate(
+                    { _id: data._id },
+                    { status: "6363f91e750f685635b02906" },
+                    { safe: true, new: true, useFindandModify: false }
+                  ).catch((err) => {
+                    console.log(err);
+                  });
+                }
+              })
+              .catch((err) => {
                 console.log(err);
               });
-            }
-          })
-          .catch((err) => {
-            console.log(err);
+            res.status(200).send(data);
+          }
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message:
+              "Error updating the Deceased Information with id=" +
+              id +
+              " " +
+              err,
           });
-        res.status(200).send(data);
-      }
+        });
     })
     .catch((err) => {
       res.status(500).send({
