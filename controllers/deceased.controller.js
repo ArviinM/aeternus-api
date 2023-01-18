@@ -182,7 +182,6 @@ exports.getAllDeceasedChart = (req, res) => {
   const FIRST_MONTH = 1;
   const LAST_MONTH = 12;
   const MONTHS_ARRAY = [
-    "december",
     "january",
     "february",
     "march",
@@ -194,10 +193,11 @@ exports.getAllDeceasedChart = (req, res) => {
     "september",
     "october",
     "november",
+    "december",
   ];
 
-  let TODAY = "2023-11-31T23:59:59";
-  let YEAR_BEFORE = "2022-11-01T00:00:00";
+  let TODAY = "2023-12-31T23:59:59";
+  let YEAR_BEFORE = "2022-12-01T00:00:00";
 
   Deceased.aggregate([
     {
