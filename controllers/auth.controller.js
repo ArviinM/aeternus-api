@@ -42,8 +42,8 @@ exports.signup = (req, res) => {
     )
       .then((data2) => {
         User.findByIdAndUpdate(
-          { _id: "63c7afb7fb9fe79294b6288c" },
-          { $pull: { grave_plot: req.body.grave_plot.id } },
+          { _id: user._id },
+          { $push: { grave_plot: req.body.grave_plot.id } },
           { new: true, useFindandModify: false }
         );
         console.log(data2);

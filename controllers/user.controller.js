@@ -108,78 +108,6 @@ exports.updateUser = (req, res) => {
     });
 };
 
-// exports.findBlockLot = (req, res) => {
-//   const block = req.params.block;
-//   const id = req.params.id;
-//   User.find({
-//     _id: "63c93a6229e6bb3e59e71e2b",
-//     grave_plot: "63c87a19e5e8505821d85034",
-//   })
-//     // .populate("grave_plot")
-//     // .populate({
-//     //   path: "grave_plot",
-//     //   populate: {
-//     //     path: "block",
-//     //   },
-//     // })
-//     .then((data) => {
-//       if (!data) {
-//         res
-//           .status(404)
-//           .send({ message: "Grave Plot not found with block " + block });
-//       } else {
-//         console.log(data);
-//         res.status(200).send(data);
-//         // res.json(data.toString("base64"));
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: "Error retrieving Grave Plot with block=" + block + " " + err,
-//       });
-//     });
-// };
-
-// exports.findBlockLot2 = (req, res) => {
-//   const block = req.params.block;
-//   const id = req.params.id;
-//   console.log(block);
-//   User.aggregate([
-//     {
-//       $unwind: "$grave_plot",
-//     },
-//     {
-//       $lookup: {
-//         from: "grave_plot",
-//         localField: "item",
-//         foreignField: "block",
-//         as: "grave_plot_docs",
-//       },
-//     },
-//     // {
-//     //   $match: {
-//     //     "grave_plot._id": "63c93a6229e6bb3e59e71e2b",
-//     //   },
-//     // },
-//   ])
-//     .then((data) => {
-//       if (!data) {
-//         res
-//           .status(404)
-//           .send({ message: "Grave Plot not found with block " + block });
-//       } else {
-//         console.log(data);
-//         res.status(200).send(data);
-//         // res.json(data.toString("base64"));
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: "Error retrieving Grave Plot with block=" + block + " " + err,
-//       });
-//     });
-// };
-
 //Fetch a role of a user
 exports.getUserRole = (req, res) => {
   const id = req.params.id;
@@ -232,6 +160,9 @@ exports.allUsers = (req, res) => {
       let authorities = [];
       let grave_block = [];
       let grave_lot = [];
+      let grave_details2 = [];
+      let grave_names_block = [];
+
       for (let i = 0; i < user.length; i++) {
         for (let x = 0; x < user[i].roles.length; x++) {
           authorities.push(user[i].roles[x].name);
@@ -242,6 +173,26 @@ exports.allUsers = (req, res) => {
         for (let y = 0; y < user[i].grave_plot.length; y++) {
           grave_lot.push(user[i].grave_plot[y].lot);
         }
+
+        for (let x = 0; x < user[i].grave_plot.length; x++) {
+          // console.log(user.grave_plot[x]);
+
+          let obj2 = {
+            id: user[i].grave_plot[x]._id,
+            name:
+              "Block " +
+              user[i].grave_plot[x].block.name +
+              " Lot " +
+              user[i].grave_plot[x].lot,
+          };
+          grave_details2.push(obj2);
+        }
+
+        for (let x = 0; x < grave_details2.length; x++) {
+          grave_names_block.push(grave_details2[x].name);
+        }
+        console.log("Grave Names");
+        console.log(grave_names_block);
 
         // console.log(grave_block);
         // console.log(grave_lot);
@@ -256,11 +207,14 @@ exports.allUsers = (req, res) => {
           address: user[i].address,
           contact_no: user[i].contact_no,
           grave_plot: { block: { name: grave_block }, lot: grave_lot },
+          grave_name: grave_names_block,
           roles: authorities,
         });
         authorities = [];
         grave_block = [];
         grave_lot = [];
+        grave_details2 = [];
+        grave_names_block = [];
       }
       console.log(myObject);
       res.status(200).send(myObject);
