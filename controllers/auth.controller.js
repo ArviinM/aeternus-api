@@ -232,7 +232,7 @@ exports.findUser = (req, res) => {
         subject: "Your Password Reset",
         text: `\tYou are receiving this because you (or someone else) requested the reset of "${user.username}" user account. \n
         Please click the following link, or paste this into your browser to complete the process. \n
-        http://localhost:3000/forgot-password/${user.id}/${token}`,
+        https://aeternus-frontend.onrender.com/forgot-password/${user.id}/${token}`,
       };
 
       transporter.sendMail(mailOptions, (err, info) => {
