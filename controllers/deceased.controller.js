@@ -36,7 +36,7 @@ exports.create = (req, res) => {
             if (data) {
               GravePlot.findByIdAndUpdate(
                 { _id: req.body.grave_plot },
-                { status: "6363f91e750f685635b02906" },
+                { status: "63c7ad8efb9fe79294b62886" },
                 { safe: true, new: true, useFindandModify: false }
               ).catch((err) => {
                 res.status(500).send({
@@ -80,11 +80,12 @@ exports.getAllDeceased = (req, res) => {
     .populate({
       path: "grave_plot",
       populate: {
-        path: "block status",
+        path: "block status lot_owner",
       },
     })
     .then((data) => {
       if (data) {
+        console.log(data);
         res.status(200).send(data);
       }
     })
@@ -422,7 +423,7 @@ exports.updateDeceasedInformation = (req, res) => {
                 if (data) {
                   GravePlot.findByIdAndUpdate(
                     { _id: data._id },
-                    { status: "6363f91e750f685635b02906" },
+                    { status: "63c7ad8efb9fe79294b62886" },
                     { safe: true, new: true, useFindandModify: false }
                   ).catch((err) => {
                     console.log(err);

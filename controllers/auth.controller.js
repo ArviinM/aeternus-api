@@ -1,6 +1,7 @@
 const config = require("../config/auth.config");
 const db = require("../models");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
+const GravePlot = require("../models/graveplot.model");
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -26,9 +27,45 @@ exports.signup = (req, res) => {
     contact_no: req.body.contact_no,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
+    grave_plot: req.body.grave_plot.id,
   });
 
   user.save((err, user) => {
+    console.log("Grave Plot");
+    console.log(req.body.grave_plot.id);
+    console.log("New User Data");
+    console.log(user);
+    User.findByIdAndUpdate(
+      { _id: "63c7afb7fb9fe79294b6288c" },
+      { $pull: { grave_plot: req.body.grave_plot.id } },
+      { new: true, useFindandModify: false }
+    )
+      .then((data2) => {
+        User.findByIdAndUpdate(
+          { _id: "63c7afb7fb9fe79294b6288c" },
+          { $pull: { grave_plot: req.body.grave_plot.id } },
+          { new: true, useFindandModify: false }
+        );
+        console.log(data2);
+        GravePlot.findByIdAndUpdate(
+          {
+            _id: req.body.grave_plot.id,
+          },
+          { lot_owner: user._id },
+          { new: true, useFindandModify: false }
+        )
+          .then((results) => {
+            console.log("Grave Plot Update");
+            console.log(results);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     if (err) {
       res.status(500).send({ message: err });
       return;
@@ -76,7 +113,13 @@ exports.signin = (req, res) => {
   User.findOne({
     username: req.body.username,
   })
-    .populate("roles", "-__v")
+    .populate("roles grave_plot", "-__v")
+    .populate({
+      path: "grave_plot",
+      populate: {
+        path: "block",
+      },
+    })
     .exec(async (err, user) => {
       if (err) {
         res.status(500).send({ message: err });
@@ -107,6 +150,36 @@ exports.signin = (req, res) => {
       for (let i = 0; i < user.roles.length; i++) {
         authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
       }
+      let grave_details = [];
+      let grave_details2 = [];
+
+      // console.log("Grave Plots Test");
+      for (let x = 0; x < user.grave_plot.length; x++) {
+        // console.log(user.grave_plot[x]);
+        let obj = {
+          id: user.grave_plot[x]._id,
+          block: {
+            id: user.grave_plot[x].block._id,
+            name: user.grave_plot[x].block.name,
+          },
+          lot: user.grave_plot[x].lot,
+        };
+        grave_details.push(obj);
+
+        let obj2 = {
+          id: user.grave_plot[x]._id,
+          name:
+            "Block " +
+            user.grave_plot[x].block.name +
+            " Lot " +
+            user.grave_plot[x].lot,
+        };
+        grave_details2.push(obj2);
+      }
+
+      // console.log("New Data");
+      // console.log(grave_details);
+
       res.status(200).send({
         id: user._id,
         username: user.username,
@@ -116,6 +189,8 @@ exports.signin = (req, res) => {
         address: user.address,
         contact_no: user.contact_no,
         roles: authorities,
+        grave_plot: grave_details,
+        grave_name: grave_details2,
         accessToken: token,
         refreshToken: refreshToken,
       });
@@ -157,7 +232,7 @@ exports.findUser = (req, res) => {
         subject: "Your Password Reset",
         text: `\tYou are receiving this because you (or someone else) requested the reset of "${user.username}" user account. \n
         Please click the following link, or paste this into your browser to complete the process. \n
-        https://aeternus-frontend.onrender.com/forgot-password/${user.id}/${token}`,
+        http://localhost:3000/forgot-password/${user.id}/${token}`,
       };
 
       transporter.sendMail(mailOptions, (err, info) => {

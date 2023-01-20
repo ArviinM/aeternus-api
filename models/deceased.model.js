@@ -10,6 +10,7 @@ const deceasedSchema = new mongoose.Schema(
     death_date: { type: Date },
     obituary: { type: String },
     grave_plot: { type: mongoose.Schema.Types.ObjectId, ref: "GravePlot" },
+    lot_owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

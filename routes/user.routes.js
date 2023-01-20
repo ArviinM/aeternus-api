@@ -29,11 +29,23 @@ module.exports = function (app) {
     controller.allUsers
   );
 
+  // app.get(
+  //   "/api/auth/grave_plot/:block",
+  //   [authJwt.verifyToken, authJwt.isAdmin],
+  //   controller.findBlockLot
+  // );
+
   //Roles
   app.put(
     "/api/auth/addRole/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.addRole
+  );
+
+  app.put(
+    "/api/auth/lot-owner/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.addLotOwned
   );
 
   //Update User Information

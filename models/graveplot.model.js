@@ -8,8 +8,12 @@ const mapSchema = new mongoose.Schema(
     southWest: [{ type: Number }],
     northEast: [{ type: Number }],
     deceased: [{ type: mongoose.Schema.Types.ObjectId, ref: "Deceased" }],
+    lot_owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  { timestamps: true }
+  { minimize: false, timestamps: true }
 );
 
 mapSchema.method("toJSON", function () {

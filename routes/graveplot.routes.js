@@ -6,6 +6,7 @@ module.exports = function (app) {
   //retrieve all grave plots
   router.get("/", graveplot.findAll);
   router.get("/check", graveplot.findCheckAvailable);
+  router.get("/lot-owned", graveplot.findCheckLotOwnedUser);
 
   //create grave plot
   router.post("/", [authJwt.verifyToken, authJwt.isAdmin], graveplot.create);
