@@ -160,6 +160,7 @@ exports.allUsers = (req, res) => {
       let authorities = [];
       let grave_block = [];
       let grave_lot = [];
+      let grave_details = [];
       let grave_details2 = [];
       let grave_names_block = [];
 
@@ -175,7 +176,16 @@ exports.allUsers = (req, res) => {
         }
 
         for (let x = 0; x < user[i].grave_plot.length; x++) {
-          // console.log(user.grave_plot[x]);
+          let obj = {
+            id: user[i].grave_plot[x]._id,
+            block: {
+              id: user[i].grave_plot[x].block._id,
+              name: user[i].grave_plot[x].block.name,
+            },
+            lot: user[i].grave_plot[x].lot,
+          };
+          console.log("New Grave Plot");
+          grave_details.push(obj);
 
           let obj2 = {
             id: user[i].grave_plot[x]._id,
@@ -187,6 +197,8 @@ exports.allUsers = (req, res) => {
           };
           grave_details2.push(obj2);
         }
+
+        console.log(grave_details);
 
         for (let x = 0; x < grave_details2.length; x++) {
           grave_names_block.push(grave_details2[x].name);
@@ -208,12 +220,14 @@ exports.allUsers = (req, res) => {
           contact_no: user[i].contact_no,
           grave_plot: { block: { name: grave_block }, lot: grave_lot },
           grave_name: grave_names_block,
+          grave_plot2: grave_details2,
           roles: authorities,
         });
         authorities = [];
         grave_block = [];
         grave_lot = [];
         grave_details2 = [];
+        grave_details = [];
         grave_names_block = [];
       }
       console.log(myObject);
@@ -260,6 +274,49 @@ exports.addLotOwned = (req, res) => {
       res.status(500).send({
         message:
           "Error updating the Deceased Information with id=" + id + " " + err,
+      });
+    });
+};
+
+exports.deleteLotOwned = (req, res) => {
+  console.log(req.body);
+
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+  console.log(id);
+
+  User.findByIdAndUpdate(
+    id,
+    { $pull: { grave_plot: req.body.grave_plot } },
+    { safe: true, upsert: true, useFindAndModify: false }
+  )
+    .then((data) => {
+      console.log(data);
+      if (data) {
+        GravePlot.findByIdAndUpdate(
+          req.body.grave_plot,
+          { lot_owner: "63c7afb7fb9fe79294b6288c" },
+          { new: true, useFindAndModify: false }
+        )
+          .then((data2) => {
+            console.log(data2);
+            res.status(200).send(data2);
+            //
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          "Error updating the User Information with id=" + id + " " + err,
       });
     });
 };

@@ -48,6 +48,12 @@ module.exports = function (app) {
     controller.addLotOwned
   );
 
+  app.put(
+    "/api/auth/delete-lot-owner/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.deleteLotOwned
+  );
+
   //Update User Information
   app.put(
     "/api/auth/user-update/:id",
