@@ -7,7 +7,7 @@ exports.create = (req, res) => {
   const plot = new GravePlot({
     block: req.body.block.id,
     lot: req.body.lot,
-    status: req.body.status.id,
+    status: req.body.status,
     southWest: [req.body.southWest[0], req.body.southWest[1]],
     northEast: [req.body.northEast[0], req.body.northEast[1]],
     lot_owner: req.body.lot_owner.id,
@@ -68,7 +68,7 @@ exports.findCheckAvailable = (req, res) => {
   //retrieve all grave plots
 
   GravePlot.find({
-    status: "63c7ad8efb9fe79294b62886",
+    status: "Occupied",
     deceased: { $size: 0 },
   })
     .then((data) => {
@@ -76,8 +76,8 @@ exports.findCheckAvailable = (req, res) => {
       console.log(data);
       if (data) {
         GravePlot.updateMany(
-          { status: "63c7ad8efb9fe79294b62886", deceased: { $size: 0 } },
-          { status: "63c7ad8efb9fe79294b62884" },
+          { status: "Occupied", deceased: { $size: 0 } },
+          { status: "Available" },
           { safe: true, new: true, useFindandModify: false }
         ).then((data2) => {
           console.log(data2);
@@ -110,7 +110,7 @@ exports.findCheckLotOwnedUser = (req, res) => {
             lot_owner: { $ne: "63c7afb7fb9fe79294b6288c" },
             deceased: { $size: 0 },
           },
-          { status: "63c7ad8efb9fe79294b62885" },
+          { status: "Reserved" },
           { safe: true, new: true, useFindandModify: false }
         ).then((data2) => {
           console.log(data2);
@@ -174,7 +174,7 @@ exports.updateName = (req, res) => {
     {
       block: req.body.block.id,
       lot: req.body.lot,
-      status: req.body.status.id,
+      status: req.body.status,
     },
     { useFindandModify: false }
   )

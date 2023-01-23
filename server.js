@@ -8,7 +8,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 var corsOptions = {
-  origin: "https://aeternus-frontend.onrender.com",
+  origin: "http://localhost:3000",
   credentials: true,
 };
 
@@ -20,7 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const db = require("./models");
 const Block = require("./models/block.model");
-const Service = require("./models/service.model");
 const Request = require("./models/request.model");
 const Role = db.role;
 const Status = db.status;
@@ -69,35 +68,6 @@ function initial() {
     }
   });
 
-  Status.estimatedDocumentCount((err, count) => {
-    if (!err && count === 0) {
-      new Status({
-        name: "available",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'available' to status collection");
-      });
-      new Status({
-        name: "reserved",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'reserved' to status collection");
-      });
-      new Status({
-        name: "occupied",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'occupied' to status collection");
-      });
-    }
-  });
-
   Block.estimatedDocumentCount((err, count) => {
     if (!err && count === 0) {
       new Block({
@@ -135,37 +105,24 @@ function initial() {
     }
   });
 
-  Service.estimatedDocumentCount((err, count) => {
-    if (!err && count === 0) {
-      new Service({
-        name: "Plot Grass Cutting",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'Plot Grass Cutting' to service collection");
-      });
-      new Service({
-        name: "Plot Cleaning",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'Plot Cleaning' to service collection");
-      });
-      new Service({
-        name: "Plot Watering",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'Plot Watering' to service collection");
-      });
-    }
-  });
-
   Request.estimatedDocumentCount((err, count) => {
     if (!err && count === 0) {
+      new Request({
+        name: "Processing",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Processing' to request collection");
+      });
+      new Request({
+        name: "Cancelled",
+      }).save((err) => {
+        if (err) {
+          console.log("Error: ", err);
+        }
+        console.log("Added 'Cancelled' to request collection");
+      });
       new Request({
         name: "Accepted",
       }).save((err) => {
@@ -175,20 +132,12 @@ function initial() {
         console.log("Added 'Accepted' to request collection");
       });
       new Request({
-        name: "Denied",
+        name: "Finished",
       }).save((err) => {
         if (err) {
           console.log("Error: ", err);
         }
-        console.log("Added 'Denied' to request collection");
-      });
-      new Request({
-        name: "Waiting",
-      }).save((err) => {
-        if (err) {
-          console.log("Error: ", err);
-        }
-        console.log("Added 'Waiting' to request collection");
+        console.log("Added 'Finished' to request collection");
       });
     }
   });

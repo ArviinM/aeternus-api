@@ -20,6 +20,13 @@ module.exports = function (app) {
     service_request.updateRequest
   );
 
+  //update a service request name
+  router.put(
+    "/update-remarks/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    service_request.updateRemarks
+  );
+
   //delete a grave plot
   router.delete("/:id", [authJwt.verifyToken], service_request.delete);
 

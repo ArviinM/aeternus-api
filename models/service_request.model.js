@@ -6,6 +6,7 @@ const serviceRequestSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     request: { type: mongoose.Schema.Types.ObjectId, ref: "Request" },
     graveplot: { type: mongoose.Schema.Types.ObjectId, ref: "GravePlot" },
+    remarks: { type: String },
   },
   { timestamps: true }
 );

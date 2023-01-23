@@ -7,6 +7,7 @@ exports.create = (req, res) => {
     user: req.body.user.id,
     request: req.body.request.id,
     graveplot: req.body.graveplot.id,
+    remarks: req.body.remarks,
   });
 
   request.save((err, user) => {
@@ -77,6 +78,7 @@ exports.findAll = (req, res) => {
           request: data[i].request,
           user: data[i].user,
           service: authorities,
+          remarks: data[i].remarks,
           createdAt: data[i].createdAt,
           updatedAt: data[i].updatedAt,
         });
@@ -111,6 +113,39 @@ exports.updateRequest = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message: "Error updating Service Request with id=" + id + " " + err,
+      });
+    });
+};
+
+exports.updateRemarks = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update cannot be empty!",
+    });
+  }
+
+  const id = req.params.id;
+  console.log(req.body);
+
+  ServiceRequest.findByIdAndUpdate(
+    id,
+    { remarks: req.body.remarks },
+    { new: true, useFindandModify: false }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot update Service Request Remarkswith id=${id}. Maybe Service Request was not found!`,
+        });
+      } else
+        res.send({
+          message: "Service Request Remarks was updated succesfully.",
+        });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          "Error updating Service Request Remarks with id=" + id + " " + err,
       });
     });
 };
@@ -170,6 +205,7 @@ exports.findAllUserServices = (req, res) => {
           request: data[i].request,
           user: data[i].user,
           service: authorities,
+          remarks: data[i].remarks,
           createdAt: data[i].createdAt,
           updatedAt: data[i].updatedAt,
         });

@@ -4,7 +4,7 @@ const mapSchema = new mongoose.Schema(
   {
     block: { type: mongoose.Schema.Types.ObjectId, ref: "Block" },
     lot: { type: String },
-    status: { type: mongoose.Schema.Types.ObjectId, ref: "Status" },
+    status: { type: String },
     southWest: [{ type: Number }],
     northEast: [{ type: Number }],
     deceased: [{ type: mongoose.Schema.Types.ObjectId, ref: "Deceased" }],
