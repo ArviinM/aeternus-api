@@ -4,7 +4,7 @@
 
 <br>
 <p align="center">
-Aeternus - A Cemetery Mapping and Information System (Backend
+Aeternus - A Cemetery Mapping and Information System (Backend)
 </p>
 <p align="center">
 crafted with <span style="color: #8b0000;">&hearts;</span> by <a href="https://arvinrhen.me">Arvin Medina</a><span> & Victor Casco, Mark Magallanes, & Celerino Louis de Ocampo</span>.
@@ -62,7 +62,7 @@ $ yarn format
 
 ## License 📜
 
-`Aeternus-Frontend` is available under the MIT license. See the LICENSE file for more info.
+`Aeternus-Backend` is available under the MIT license. See the LICENSE file for more info.
 
 
 ## Forking this repo 🚨
